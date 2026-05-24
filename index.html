@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gran Galà della Pizza Surgelata</title>
+    <style>
+        /* Stili Generali e Colori */
+        :root {
+            --primary-blue: #1b3b5c;
+            --gold: #d4af37;
+            --light-bg: #fdfbf7;
+            --text-dark: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+        }
+        h1, h2, h3 { color: var(--primary-blue); }
+
+        /* Menu a tre puntini */
+        .menu-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .dots-btn {
+            background: var(--primary-blue);
+            color: var(--gold);
+            border: none;
+            font-size: 24px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .dropdown-content a {
+            color: var(--primary-blue);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .dropdown-content a:hover {
+            background-color: var(--gold);
+            color: white;
+        }
+        .show { display: block; }
+
+        /* Gestione Sezioni */
+        .section {
+            display: none;
+            padding: 40px 20px;
+            max-width: 1000px;
+            margin: auto;
+            text-align: center;
+        }
+        .section.active { display: block; }
+
+        /* Home Immagine */
+        .logo-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        /* Sezione Partecipanti (Stile Card) */
+        .partecipanti-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .card {
+            background: white;
+            border: 2px solid var(--gold);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-blue);
+            margin-bottom: 15px;
+        }
+
+        /* Classifica Live */
+        .btn-aggiorna {
+            background-color: var(--gold);
+            color: var(--primary-blue);
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-aggiorna:hover { background-color: #c5a028; }
+        
+        .podio {
+            font-size: 20px;
+            margin: 15px 0;
+            padding: 15px;
+            border: 2px solid var(--gold);
+            background: white;
+            border-radius: 10px;
+            text-align: left;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .podio.primo {
+            background: #fffdf5;
+            border-width: 4px;
+            transform: scale(1.02);
+        }
+        .dettagli-voti {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+            border-top: 1px dashed #ccc;
+            padding-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-container">
+        <button onclick="toggleMenu()" class="dots-btn">⋮</button>
+        <div id="dropdownMenu" class="dropdown-content">
+            <a onclick="navigate('home')">Home</a>
+            <a onclick="navigate('regolamento')">Regolamento</a>
+            <a onclick="navigate('partecipanti')">Partecipanti</a>
+            <a onclick="navigate('classifica')">Classifica Live</a>
+        </div>
+    </div>
+
+    <div id="home" class="section active">
+        <h1>Benvenuti al Gran Galà</h1>
+        <img src="PizzaParty.png" alt="Logo Pizza Party" class="logo-img">
+    </div>
+
+    <div id="regolamento" class="section">
+        <h1>Il Regolamento Ufficiale</h1>
+        <div style="text-align: left; background: white; padding: 20px; border-radius: 10px; border: 1px solid #ccc;">
+            <p>L'obiettivo è nobile e ambizioso: separare il grano dalla crusca e eleggere la migliore pizza surgelata disponibile sul mercato.</p>
+            <ul>
+                <li><strong>1. Uniformità terapeutica della cottura:</strong> Le pizze verranno infornate in sequenza dall'Host, rispettando scrupolosamente i tempi e le temperature indicate dalle rispettive confezioni per non svantaggiare nessun concorrente.</li>
+                <li><strong>2. Il Servizio al Buio:</strong> Le pizze verranno servite a spicchi su taglieri numerati (Pizza #1, Pizza #2, ecc.).</li>
+                <li><strong>3. Onestà Intellettuale:</strong> È severamente vietato fare favoritismi o cercare di riconoscere la propria pizza.</li>
+                <li><strong>4. La Regola del Condimento:</strong> Oltre alla base canonica, la pizza scelta deve obbligatoriamente contenere da un minimo di 1 a un massimo di 3 ingredienti aggiuntivi.</li>
+                <li><strong>5. L'Emendamento "Anti-Ranch":</strong> È assolutamente proibito modificare la pizza con ingredienti accessori prima o dopo la cottura.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="partecipanti" class="section">
+        <h1>I Giurati (e i Concorrenti)</h1>
+        <div class="partecipanti-grid">
+            <div class="card"><img src="PizzaParty.png" alt="Leo"><h3>Leo</h3></div>
+            <div class="card"><img src="PizzaParty.png" alt="Andre Mora"><h3>Andre Mora</h3></div>
+            <div class="card"><img src="PizzaParty.png" alt="Andre Cardo"><h3>Andre Cardo</h3></div>
+            <div class="card"><img src="PizzaParty.png" alt="Sara"><h3>Sara</h3></div>
+            <div class="card"><img src="PizzaParty.png" alt="Gaia"><h3>Gaia</h3></div>
+            <div class="card"><img src="PizzaParty.png" alt="Dani"><h3>Dani</h3></div>
+            <div class="card"><img src="PizzaParty.png" alt="Debe"><h3>Debe</h3></div>
+            <div class="card"><img src="PizzaParty.png" alt="Megghi"><h3>Megghi</h3></div>
+        </div>
+    </div>
+
+    <div id="classifica" class="section">
+        <h1>Classifica Live</h1>
+        <p>Il Notaio sta raccogliendo i dati dal Modulo Google...</p>
+        <button class="btn-aggiorna" onclick="caricaDati()">Aggiorna Dati dal Server 🔄</button>
+        <div id="risultatiClassifica">
+            <p style="color:#888;">Nessun dato caricato. Clicca il pulsante per leggere i voti.</p>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. IL NUOVO LINK DIRETTO DI GOOGLE
+        // ==========================================
+        const GOOGLE_SHEET_ID = "1WN2Y2Bj4TYRN6dmN0sqeE6l29w_-YDYJX_7JcR5ILTE";
+        const SHEET_GID = "1811270328";
+        
+        // Questo è il formato corretto per saltare i blocchi del browser e bypassare la cache
+        const GOOGLE_QUERY_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}&tq=`;
+
+        // ==========================================
+        // 2. MAPPA DELLE PIZZE
+        // ==========================================
+        const MAPPA_PIZZE = {
+            "1": "Dani",
+            "2": "Andre Mora",
+            "3": "Leo", 
+            "4": "Andre Cardo",
+            "5": "Debe",
+            "6": "Sara",
+            "7": "Gaia", 
+            "8": "Megghi"
+        };
+
+        // Gestione Menu a tendina
+        function toggleMenu() {
+            document.getElementById("dropdownMenu").classList.toggle("show");
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.dots-btn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    if (dropdowns[i].classList.contains('show')) {
+                        dropdowns[i].classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        function navigate(sectionId) {
+            var sections = document.getElementsByClassName('section');
+            for (var i = 0; i < sections.length; i++) {
+                sections[i].classList.remove('active');
+            }
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        // Funzione per scaricare e analizzare i dati DIRETTAMENTE da Google
+        async function caricaDati() {
+            document.getElementById('risultatiClassifica').innerHTML = "<p>Connessione diretta a Google Fogli in corso...</p>";
+
+            try {
+                // Generiamo un numero casuale per ingannare in modo definitivo la cache del browser
+                const antiCache = new Date().getTime();
+                const urlCompleto = GOOGLE_QUERY_URL + "&_nocache=" + antiCache;
+
+                // Download diretto! Nessun proxy.
+                const response = await fetch(urlCompleto);
+                
+                if (!response.ok) {
+                    throw new Error("Google ha risposto con errore: " + response.status);
+                }
+                
+                const data = await response.text();
+                
+                // Pulizia dei dati CSV (Google racchiude i valori in virgolette)
+                // Dividiamo per righe
+                let rawRows = data.split('\n');
+                
+                // Rimuoviamo l'intestazione
+                rawRows.shift(); 
+                
+                let pizzeStats = {};
+
+                rawRows.forEach(rawRow => {
+                    // Questa regex gestisce correttamente la separazione ignorando le virgole interne
+                    let row = rawRow.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                    
+                    if (!row) return; // Riga vuota
+                    
+                    // Rimuoviamo le virgolette in eccesso aggiunte da Google da ogni elemento
+                    row = row.map(item => item.replace(/(^"|"$)/g, ''));
+
+                    // Struttura colonne: [0]Timestamp, [1]Nome, [2]Pizza, [3]Estetica, [4]Impasto, [5]Pomodoro, [6]Mozzarella, [7]Topping, [8]Prezzo
+                    if(row.length < 9 || !row[2]) return; 
+
+                    let nomeVotante = row[1].trim().toLowerCase(); 
+                    let numeroPizzaRaw = row[2].trim(); 
+                    
+                    let match = numeroPizzaRaw.match(/\d+/);
+                    let idPizza = match ? match[0] : numeroPizzaRaw;
+
+                    if (!pizzeStats[idPizza]) {
+                        pizzeStats[idPizza] = {};
+                    }
+
+                    // Funzione per convertire le virgole in punti
+                    const parseVoto = (val) => parseFloat(String(val).replace(',', '.')) || 0;
+
+                    // SALVATAGGIO VOTO:
+                    pizzeStats[idPizza][nomeVotante] = {
+                        estetica: parseVoto(row[3]),
+                        impasto: parseVoto(row[4]),
+                        pomodoro: parseVoto(row[5]),
+                        mozzarella: parseVoto(row[6]),
+                        toppings: parseVoto(row[7]),
+                        prezzo: parseVoto(row[8])
+                    };
+                });
+
+                // Calcola le medie
+                let classificaFinale = [];
+                for (let idPizza in pizzeStats) {
+                    
+                    let votiPerQuestaPizza = Object.values(pizzeStats[idPizza]);
+                    let conteggioVotiValidi = votiPerQuestaPizza.length;
+                    
+                    if (conteggioVotiValidi === 0) continue;
+
+                    let sum = { estetica: 0, impasto: 0, pomodoro: 0, mozzarella: 0, toppings: 0, prezzo: 0 };
+                    
+                    votiPerQuestaPizza.forEach(voto => {
+                        sum.estetica += voto.estetica;
+                        sum.impasto += voto.impasto;
+                        sum.pomodoro += voto.pomodoro;
+                        sum.mozzarella += voto.mozzarella;
+                        sum.toppings += voto.toppings;
+                        sum.prezzo += voto.prezzo;
+                    });
+
+                    let mEstetica = sum.estetica / conteggioVotiValidi;
+                    let mImpasto = sum.impasto / conteggioVotiValidi;
+                    let mPomodoro = sum.pomodoro / conteggioVotiValidi;
+                    let mMozzarella = sum.mozzarella / conteggioVotiValidi;
+                    let mToppings = sum.toppings / conteggioVotiValidi;
+                    let mPrezzo = sum.prezzo / conteggioVotiValidi;
+                    
+                    let mediaTotale = (mEstetica + mImpasto + mPomodoro + mMozzarella + mToppings + mPrezzo) / 6;
+
+                    let nomeProprietarioPizza = MAPPA_PIZZE[idPizza] ? `Pizza di ${MAPPA_PIZZE[idPizza]}` : `Pizza #${idPizza}`;
+
+                    classificaFinale.push({
+                        pizza: nomeProprietarioPizza,
+                        votiTotali: conteggioVotiValidi,
+                        mediaTotale: mediaTotale.toFixed(2),
+                        dettagli: {
+                            Estetica: mEstetica.toFixed(2),
+                            Impasto: mImpasto.toFixed(2),
+                            Pomodoro: mPomodoro.toFixed(2),
+                            Mozzarella: mMozzarella.toFixed(2),
+                            Toppings: mToppings.toFixed(2),
+                            Prezzo: mPrezzo.toFixed(2)
+                        }
+                    });
+                }
+
+                // Ordina dalla media più alta a quella più bassa
+                classificaFinale.sort((a, b) => b.mediaTotale - a.mediaTotale);
+
+                // Stampa l'HTML
+                let htmlClassifica = "";
+                if(classificaFinale.length === 0) {
+                    htmlClassifica = "<p>Nessun voto ancora registrato per le pizze indicate.</p>";
+                } else {
+                    classificaFinale.forEach((res, index) => {
+                        let posizione = index + 1;
+                        let stile = posizione === 1 ? 'podio primo' : 'podio';
+                        
+                        htmlClassifica += `
+                        <div class="${stile}">
+                            <strong>${posizione}° Posto: ${res.pizza}</strong> <br>
+                            <span style="font-size:24px; color:var(--primary-blue); font-weight:bold;">Media Totale: ${res.mediaTotale} / 10</span> 
+                            <span style="font-size:12px; color:#888;">(Basata su ${res.votiTotali} votanti univoci)</span>
+                            
+                            <div class="dettagli-voti">
+                                <div>📷 Estetica: ${res.dettagli.Estetica}</div>
+                                <div>🍞 Impasto: ${res.dettagli.Impasto}</div>
+                                <div>🍅 Pomodoro: ${res.dettagli.Pomodoro}</div>
+                                <div>🧀 Mozzarella: ${res.dettagli.Mozzarella}</div>
+                                <div>🍄 Topping: ${res.dettagli.Toppings}</div>
+                                <div>💰 Q/Prezzo: ${res.dettagli.Prezzo}</div>
+                            </div>
+                        </div>`;
+                    });
+                }
+
+                document.getElementById('risultatiClassifica').innerHTML = htmlClassifica;
+
+            } catch (error) {
+                console.error("Errore di caricamento:", error);
+                document.getElementById('risultatiClassifica').innerHTML = `<p style="color:red;">Errore di connessione a Google Fogli. Riprova tra qualche istante.</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
