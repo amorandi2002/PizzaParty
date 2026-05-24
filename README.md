@@ -1,5 +1,5 @@
 # PizzaParty
 
 <div align="center">
-  <img src="PizzaParty.png" alt="Logo" width="450">
+  <img src="PizzaParty.png" alt="Logo">
 </div>
