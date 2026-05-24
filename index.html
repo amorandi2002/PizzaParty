@@ -201,29 +201,21 @@
         </div>
     </div>
 
-    <script>
+<script>
         // ==========================================
-        // 1. IL NUOVO LINK DIRETTO DI GOOGLE
+        // 1. IMPOSTAZIONI DEI DUE FOGLI GOOGLE
         // ==========================================
-        const GOOGLE_SHEET_ID = "1WN2Y2Bj4TYRN6dmN0sqeE6l29w_-YDYJX_7JcR5ILTE";
-        const SHEET_GID = "1811270328";
         
-        // Questo è il formato corretto per saltare i blocchi del browser e bypassare la cache
-        const GOOGLE_QUERY_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}&tq=`;
+        // FOGLIO 1: I Voti (Risposte del Modulo)
+        const SHEET_VOTI_ID = "1WN2Y2Bj4TYRN6dmN0sqeE6l29w_-YDYJX_7JcR5ILTE";
+        const SHEET_VOTI_GID = "1811270328";
+        
+        // FOGLIO 2: La Legenda (Nomi e Numeri)
+        const SHEET_LEGENDA_ID = "1mtfwKXZ6vPiztnS5kYnuo-vPyBqp63hfl5MOS8qeIcw";
+        const SHEET_LEGENDA_GID = "0";
 
-        // ==========================================
-        // 2. MAPPA DELLE PIZZE
-        // ==========================================
-        const MAPPA_PIZZE = {
-            "1": "Dani",
-            "2": "Andre Mora",
-            "3": "Leo", 
-            "4": "Andre Cardo",
-            "5": "Debe",
-            "6": "Sara",
-            "7": "Gaia", 
-            "8": "Megghi"
-        };
+        // Costruiamo gli URL diretti per estrarre i dati in formato pulito
+        const getCsvUrl = (id, gid) => `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&gid=${gid}`;
 
         // Gestione Menu a tendina
         function toggleMenu() {
@@ -249,43 +241,61 @@
             document.getElementById(sectionId).classList.add('active');
         }
 
-        // Funzione per scaricare e analizzare i dati DIRETTAMENTE da Google
+        // Funzione per scaricare la Legenda e poi i Voti
         async function caricaDati() {
-            document.getElementById('risultatiClassifica').innerHTML = "<p>Connessione diretta a Google Fogli in corso...</p>";
+            document.getElementById('risultatiClassifica').innerHTML = "<p>Lettura della Legenda e calcolo dei voti in corso...</p>";
 
             try {
                 // Generiamo un numero casuale per ingannare in modo definitivo la cache del browser
                 const antiCache = new Date().getTime();
-                const urlCompleto = GOOGLE_QUERY_URL + "&_nocache=" + antiCache;
+                
+                // ---------------------------------------------------------
+                // FASE 1: SCARICA LA LEGENDA
+                // ---------------------------------------------------------
+                const urlLegenda = getCsvUrl(SHEET_LEGENDA_ID, SHEET_LEGENDA_GID) + "&_nocache=" + antiCache;
+                const responseLegenda = await fetch(urlLegenda);
+                
+                if (!responseLegenda.ok) throw new Error("Errore nel caricamento della Legenda");
+                
+                const dataLegenda = await responseLegenda.text();
+                let MAPPA_PIZZE = {};
+                
+                // Analizza le righe della legenda (Es. "Leo", "1")
+                const righeLegenda = dataLegenda.split(/\r?\n/);
+                righeLegenda.forEach(rawRow => {
+                    // Dividiamo le colonne e togliamo le virgolette in eccesso
+                    let parts = rawRow.split(',').map(item => item.replace(/(^"|"$)/g, '').trim());
+                    if(parts.length >= 2 && parts[0] !== "" && parts[1] !== "") {
+                        let nome = parts[0];
+                        let id = parts[1];
+                        MAPPA_PIZZE[id] = nome;
+                    }
+                });
 
-                // Download diretto! Nessun proxy.
-                const response = await fetch(urlCompleto);
+
+                // ---------------------------------------------------------
+                // FASE 2: SCARICA I VOTI E CALCOLA LA CLASSIFICA
+                // ---------------------------------------------------------
+                const urlVoti = getCsvUrl(SHEET_VOTI_ID, SHEET_VOTI_GID) + "&_nocache=" + antiCache;
+                const responseVoti = await fetch(urlVoti);
                 
-                if (!response.ok) {
-                    throw new Error("Google ha risposto con errore: " + response.status);
-                }
+                if (!responseVoti.ok) throw new Error("Errore nel caricamento dei Voti");
                 
-                const data = await response.text();
+                const dataVoti = await responseVoti.text();
                 
-                // Pulizia dei dati CSV (Google racchiude i valori in virgolette)
-                // Dividiamo per righe
-                let rawRows = data.split('\n');
-                
-                // Rimuoviamo l'intestazione
-                rawRows.shift(); 
+                let rawRows = dataVoti.split(/\r?\n/);
+                rawRows.shift(); // Rimuoviamo la riga di intestazione del modulo
                 
                 let pizzeStats = {};
 
                 rawRows.forEach(rawRow => {
-                    // Questa regex gestisce correttamente la separazione ignorando le virgole interne
                     let row = rawRow.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-                    
                     if (!row) return; // Riga vuota
                     
-                    // Rimuoviamo le virgolette in eccesso aggiunte da Google da ogni elemento
                     row = row.map(item => item.replace(/(^"|"$)/g, ''));
 
-                    // Struttura colonne: [0]Timestamp, [1]Nome, [2]Pizza, [3]Estetica, [4]Impasto, [5]Pomodoro, [6]Mozzarella, [7]Topping, [8]Prezzo
+                    // Struttura colonne modulo: 
+                    // [0]Timestamp, [1]Nome, [2]Pizza, [3]Estetica, [4]Impasto, [5]Pomodoro, [6]Mozzarella, [7]Topping, [8]Prezzo
                     if(row.length < 9 || !row[2]) return; 
 
                     let nomeVotante = row[1].trim().toLowerCase(); 
@@ -298,10 +308,10 @@
                         pizzeStats[idPizza] = {};
                     }
 
-                    // Funzione per convertire le virgole in punti
+                    // Funzione per convertire le virgole decimali italiane in punti
                     const parseVoto = (val) => parseFloat(String(val).replace(',', '.')) || 0;
 
-                    // SALVATAGGIO VOTO:
+                    // Salviamo il voto (sovrascrive eventuali voti doppi dello stesso utente per la stessa pizza)
                     pizzeStats[idPizza][nomeVotante] = {
                         estetica: parseVoto(row[3]),
                         impasto: parseVoto(row[4]),
@@ -312,7 +322,9 @@
                     };
                 });
 
-                // Calcola le medie
+                // ---------------------------------------------------------
+                // FASE 3: CALCOLO DELLE MEDIE
+                // ---------------------------------------------------------
                 let classificaFinale = [];
                 for (let idPizza in pizzeStats) {
                     
@@ -341,7 +353,8 @@
                     
                     let mediaTotale = (mEstetica + mImpasto + mPomodoro + mMozzarella + mToppings + mPrezzo) / 6;
 
-                    let nomeProprietarioPizza = MAPPA_PIZZE[idPizza] ? `Pizza di ${MAPPA_PIZZE[idPizza]}` : `Pizza #${idPizza}`;
+                    // TRADUZIONE GRAZIE ALLA LEGENDA!
+                    let nomeProprietarioPizza = MAPPA_PIZZE[idPizza] ? `Pizza di ${MAPPA_PIZZE[idPizza]}` : `Pizza Sconosciuta (#${idPizza})`;
 
                     classificaFinale.push({
                         pizza: nomeProprietarioPizza,
@@ -361,7 +374,9 @@
                 // Ordina dalla media più alta a quella più bassa
                 classificaFinale.sort((a, b) => b.mediaTotale - a.mediaTotale);
 
-                // Stampa l'HTML
+                // ---------------------------------------------------------
+                // FASE 4: STAMPA L'HTML
+                // ---------------------------------------------------------
                 let htmlClassifica = "";
                 if(classificaFinale.length === 0) {
                     htmlClassifica = "<p>Nessun voto ancora registrato per le pizze indicate.</p>";
@@ -392,9 +407,10 @@
 
             } catch (error) {
                 console.error("Errore di caricamento:", error);
-                document.getElementById('risultatiClassifica').innerHTML = `<p style="color:red;">Errore di connessione a Google Fogli. Riprova tra qualche istante.</p>`;
+                document.getElementById('risultatiClassifica').innerHTML = `<p style="color:red;">Errore di connessione a Google Fogli. Se stai aprendo il file dal computer, mettilo online (es. su Netlify o GitHub) per sbloccare la connessione!</p>`;
             }
         }
     </script>
+    
 </body>
 </html>
